@@ -1,4 +1,4 @@
-<h1 align="center"> NEXUS-AI YOUR BEST WHATSAPPBOT</h1>
+<h1 align="center"> NEXUS-AI YOUR BEST WHATSAPP BOT</h1>
 
 <p align="center">
   <a href="https://github.com/officialpkdiller/NEXUS-AI">
