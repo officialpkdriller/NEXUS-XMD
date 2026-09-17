@@ -47,28 +47,32 @@ try{
 
 await repondre("🤖 Thinking...");
 
-// KeylessAI endpoint - no API key needed
-const api = "https://keylessai.thryx.workers.dev/v1/chat/completions";
+// 🔑 Your OpenAI API key (inline)
+const OPENAI_API_KEY = "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";
 
-const res = await axios.post(api, {
-  model: "gpt-4o",
-  messages: [
-    { 
-      role: "system", 
-      content: "You are a very polite and intelligent AI assistant." 
-    },
-    { 
-      role: "user", 
-      content: question 
+const res = await axios.post(
+  "https://api.openai.com/v1/chat/completions",
+  {
+    model: "gpt-4o-mini",
+    messages: [
+      { 
+        role: "system", 
+        content: "You are a very polite and intelligent AI assistant." 
+      },
+      { 
+        role: "user", 
+        content: question 
+      }
+    ]
+  },
+  {
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENAI_API_KEY}`
     }
-  ]
-}, {
-  headers: {
-    "Content-Type": "application/json"
   }
-});
+);
 
-// Extract the response text
 const answer = res.data?.choices?.[0]?.message?.content;
 
 if(!answer) return repondre("❌ AI failed to respond.");
@@ -102,9 +106,9 @@ renderLargerThumbnail:false
 
 }catch(err){
 
-console.log("AI Error:",err);
+console.log("AI Error:", err?.response?.data || err.message);
 
-repondre("❌ AI request failed.");
+repondre("😂 AI request failed.");
 
 }
 
