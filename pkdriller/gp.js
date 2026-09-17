@@ -47,13 +47,31 @@ try{
 
 await repondre("🤖 Thinking...");
 
-const api = `https://bmb-api.zone.id/api/chatgpt?text=${encodeURIComponent(question)}&prompt=You+are+a+very+polite+and+intelligent+AI`;
+// KeylessAI endpoint - no API key needed
+const api = "https://keylessai.thryx.workers.dev/v1/chat/completions";
 
-const res = await axios.get(api);
+const res = await axios.post(api, {
+  model: "gpt-4o",
+  messages: [
+    { 
+      role: "system", 
+      content: "You are a very polite and intelligent AI assistant." 
+    },
+    { 
+      role: "user", 
+      content: question 
+    }
+  ]
+}, {
+  headers: {
+    "Content-Type": "application/json"
+  }
+});
 
-if(!res.data.status) return repondre("❌ AI failed to respond.");
+// Extract the response text
+const answer = res.data?.choices?.[0]?.message?.content;
 
-const answer = res.data.result;
+if(!answer) return repondre("❌ AI failed to respond.");
 
 await sock.sendMessage(
 jid,
