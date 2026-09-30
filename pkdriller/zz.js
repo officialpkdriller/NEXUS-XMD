@@ -4,7 +4,7 @@ const axios = require("axios");
 const { zokou } = require("../framework/zokou");
 
 // 🔑 YOUR GOOGLE GEMINI API KEY
-const GEMINI_API_KEY = "AIzaSyBBQVVq50tfdg5YfZ6fEp1tiCEQ2NuLA_w";
+const GEMINI_API_KEY = "AQ.Ab8RN6LaCCuFLLmdcMki87XLsquUTVdlPxxHZMA2KeoUXJUxkw";
 
 
 // ==================== 1. AI CHAT (GOOGLE GEMINI - FREE) ====================
