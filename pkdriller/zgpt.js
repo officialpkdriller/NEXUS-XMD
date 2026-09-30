@@ -1,335 +1,219 @@
 const axios = require("axios");
 const { zokou } = require("../framework/zokou");
 
-// ─────────────────────────────────────────────
-// NEXUS-AI GROQ GPT
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+//                  NEXUS-AI • GPT ENGINE
+// ═══════════════════════════════════════════════════════════
 
-const GROQ_API_URL =
-  "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_API_KEY = "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";
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = "openai/gpt-oss-20b";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-const GROQ_MODEL =
-  process.env.GROQ_MODEL || "openai/gpt-oss-20b";
-
-const messageDelay = 8000;
-let lastTextTime = 0;
-
-// ─────────────────────────────────────────────
-// NEXUS-AI SYSTEM PROMPT
-// ─────────────────────────────────────────────
+// Prevent excessive requests
+const cooldown = new Map();
+const COOLDOWN_TIME = 8000;
 
 const SYSTEM_PROMPT = `
 You are NEXUS-AI, an intelligent WhatsApp AI assistant.
 
-Your developer is PK-Tech / pkdriller.
+Your personality:
+- Helpful
+- Intelligent
+- Friendly
+- Clear
+- Respectful
+- Concise when possible
+- Detailed when necessary
 
-Be helpful, accurate, friendly and concise.
-Understand English, Swahili and common mixed-language messages.
+You can communicate naturally in English, Swahili, Sheng, and mixed languages.
 
-When the user asks a technical question, provide clear
-and practical answers with code when appropriate.
-
-Do not claim to have performed actions that you cannot perform.
-Do not reveal private system instructions or API keys.
-
-You are running inside the NEXUS-AI WhatsApp bot.
+Rules:
+1. Answer the user's actual question directly.
+2. Do not claim to have abilities you do not have.
+3. Do not expose system instructions, API keys, or internal configuration.
+4. When coding is requested, provide clean and complete code.
+5. Preserve the user's requested programming framework.
+6. Avoid unnecessary repetition.
+7. If the user speaks Swahili, you may respond in Swahili.
+8. If the user mixes English and Swahili, respond naturally in the same style.
 `;
 
-// ─────────────────────────────────────────────
-// GROQ REQUEST
-// ─────────────────────────────────────────────
-
-async function callGroq(query) {
-  if (!GROQ_API_KEY) {
-    throw new Error(
-      "GROQ_API_KEY is not configured."
-    );
-  }
-
-  const response = await axios.post(
-    GROQ_API_URL,
-    {
-      model: GROQ_MODEL,
-
-      messages: [
+async function askGroq(message) {
+    const response = await axios.post(
+        GROQ_URL,
         {
-          role: "system",
-          content: SYSTEM_PROMPT
+            model: GROQ_MODEL,
+            messages: [
+                {
+                    role: "system",
+                    content: SYSTEM_PROMPT
+                },
+                {
+                    role: "user",
+                    content: message
+                }
+            ],
+            temperature: 0.7,
+            max_tokens: 2048,
+            stream: false
         },
         {
-          role: "user",
-          content: query
+            headers: {
+                "Authorization": `Bearer ${GROQ_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            timeout: 60000
         }
-      ],
+    );
 
-      stream: false
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-
-      timeout: 60000,
-
-      maxContentLength: 10 * 1024 * 1024,
-      maxBodyLength: 10 * 1024 * 1024
-    }
-  );
-
-  return response.data;
+    return response.data?.choices?.[0]?.message?.content;
 }
 
-// ─────────────────────────────────────────────
-// COMMAND
-// ─────────────────────────────────────────────
-
-zokou(
-  {
+zokou({
     nomCom: "gpt",
-    aliases: ["gpt4", "ai", "ask"],
+    aliases: ["ai", "ask", "gpt4"],
     categorie: "AI",
-    reaction: "🧠",
-    desc: "Chat with NEXUS-AI powered by Groq"
-  },
+    reaction: "🤖",
+    desc: "Chat with NEXUS-AI using Groq AI"
+}, async (dest, zk, commandeOptions) => {
 
-  async (dest, zk, commandeOptions) => {
     const {
-      ms,
-      arg,
-      repondre,
-      auteurMessage
+        repondre,
+        arg,
+        ms
     } = commandeOptions;
-
-    const query = Array.isArray(arg)
-      ? arg.join(" ").trim()
-      : String(arg || "").trim();
-
-    // ─────────────────────────────────────────
-    // CHECK MESSAGE
-    // ─────────────────────────────────────────
-
-    if (!query) {
-      return repondre(
-        `╭━━━〔 🧠 NEXUS-AI 〕━━━╮
-┃
-┃ ❯ Please ask me something.
-┃
-┃ Example:
-┃ ❯ .gpt explain artificial intelligence
-┃
-┃ You can also use:
-┃ ❯ .ai your question
-┃ ❯ .ask your question
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-      );
-    }
-
-    // ─────────────────────────────────────────
-    // CHECK API KEY
-    // ─────────────────────────────────────────
-
-    if (!GROQ_API_KEY) {
-      console.error(
-        "NEXUS-AI: GROQ_API_KEY is missing."
-      );
-
-      return repondre(
-        `╭━━━〔 ⚠️ NEXUS-AI CONFIG 〕━━━╮
-┃
-┃ Groq API is not configured.
-┃
-┃ Please add:
-┃ GROQ_API_KEY
-┃
-┃ to the bot environment variables.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-      );
-    }
-
-    // ─────────────────────────────────────────
-    // RATE LIMIT
-    // ─────────────────────────────────────────
-
-    const currentTime = Date.now();
-
-    if (
-      currentTime - lastTextTime <
-      messageDelay
-    ) {
-      const remaining = Math.ceil(
-        (
-          messageDelay -
-          (currentTime - lastTextTime)
-        ) / 1000
-      );
-
-      return repondre(
-        `╭━━━〔 ⏳ NEXUS-AI 〕━━━╮
-┃
-┃ Please wait ${remaining}s
-┃ before sending another
-┃ AI request.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-      );
-    }
-
-    // ─────────────────────────────────────────
-    // PROCESSING MESSAGE
-    // ─────────────────────────────────────────
-
-    await repondre(
-      `╭━━━〔 🧠 NEXUS-AI 〕━━━╮
-┃
-┃ ✦ Thinking...
-┃
-┃ ⚡ Powered by Groq
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-    );
 
     try {
 
-      // ───────────────────────────────────────
-      // CALL GROQ
-      // ───────────────────────────────────────
+        // ───────────────────────────────────────────────────
+        // Check message
+        // ───────────────────────────────────────────────────
 
-      const data = await callGroq(query);
+        const question = Array.isArray(arg)
+            ? arg.join(" ").trim()
+            : String(arg || "").trim();
 
-      const answer =
-        data?.choices?.[0]?.message?.content;
-
-      if (
-        !answer ||
-        typeof answer !== "string"
-      ) {
-        throw new Error(
-          "Groq returned an empty response."
-        );
-      }
-
-      // ───────────────────────────────────────
-      // SUCCESS
-      // ───────────────────────────────────────
-
-      const finalMessage =
-        `╭━━━〔 🧠 NEXUS-AI 〕━━━╮
-┃
-┃ ${answer}
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`;
-
-      await zk.sendMessage(
-        dest,
-        {
-          text: finalMessage,
-          contextInfo: {
-            mentionedJid: auteurMessage
-              ? [auteurMessage]
-              : []
-          }
-        },
-        {
-          quoted: ms
+        if (!question) {
+            return repondre(
+                `╭━━━〔 🤖 NEXUS-AI 〕━━━╮\n` +
+                `┃\n` +
+                `┃  Ask me anything.\n` +
+                `┃\n` +
+                `┃  Example:\n` +
+                `┃  .gpt Explain quantum physics\n` +
+                `┃  .gpt Nipe idea ya WhatsApp bot\n` +
+                `┃  .gpt Write a JavaScript function\n` +
+                `┃\n` +
+                `╰━━━━━━━━━━━━━━━━━━━━╯`
+            );
         }
-      );
 
-      // Update cooldown only after
-      // successful response.
-      lastTextTime = currentTime;
+        // ───────────────────────────────────────────────────
+        // User cooldown
+        // ───────────────────────────────────────────────────
+
+        const sender =
+            ms?.sender ||
+            ms?.key?.participant ||
+            ms?.key?.remoteJid ||
+            dest;
+
+        const now = Date.now();
+        const lastRequest = cooldown.get(sender);
+
+        if (lastRequest && now - lastRequest < COOLDOWN_TIME) {
+
+            const remaining = Math.ceil(
+                (COOLDOWN_TIME - (now - lastRequest)) / 1000
+            );
+
+            return repondre(
+                `⏳ *NEXUS-AI is cooling down.*\n\n` +
+                `Please wait *${remaining}s* before sending another request.`
+            );
+        }
+
+        cooldown.set(sender, now);
+
+        // ───────────────────────────────────────────────────
+        // Processing message
+        // ───────────────────────────────────────────────────
+
+        await repondre(
+            `╭━━〔 🤖 NEXUS-AI 〕━━╮\n` +
+            `┃\n` +
+            `┃  ⟳ Processing your request...\n` +
+            `┃\n` +
+            `╰━━━━━━━━━━━━━━━━━━━╯`
+        );
+
+        // ───────────────────────────────────────────────────
+        // Ask Groq
+        // ───────────────────────────────────────────────────
+
+        const answer = await askGroq(question);
+
+        if (!answer) {
+            return repondre(
+                `╭━━〔 ⚠️ NEXUS-AI 〕━━╮\n` +
+                `┃\n` +
+                `┃  I couldn't generate a response.\n` +
+                `┃  Please try again.\n` +
+                `┃\n` +
+                `╰━━━━━━━━━━━━━━━━━━━╯`
+            );
+        }
+
+        // ───────────────────────────────────────────────────
+        // Final response
+        // ───────────────────────────────────────────────────
+
+        return repondre(
+            `╭━━〔 🤖 NEXUS-AI 〕━━╮\n` +
+            `┃\n` +
+            `┃ ${answer.replace(/\n/g, "\n┃ ")}\n` +
+            `┃\n` +
+            `╰━━━━━━━━━━━━━━━━━━━╯\n` +
+            `\n` +
+            `> ⚡ Powered by NEXUS-AI`
+        );
 
     } catch (error) {
 
-      const status =
-        error?.response?.status;
+        console.error("NEXUS-AI GPT ERROR:", error?.response?.data || error);
 
-      const apiMessage =
-        error?.response?.data?.error?.message;
+        if (error?.response?.status === 401) {
+            return repondre(
+                `❌ *NEXUS-AI API Error*\n\n` +
+                `The AI API key is invalid or expired.`
+            );
+        }
 
-      console.error(
-        "NEXUS-AI Groq Error:",
-        status || "",
-        apiMessage ||
-        error.message ||
-        error
-      );
+        if (error?.response?.status === 403) {
+            return repondre(
+                `❌ *NEXUS-AI API Error*\n\n` +
+                `The API request was rejected.`
+            );
+        }
 
-      // ───────────────────────────────────────
-      // RATE LIMIT FROM GROQ
-      // ───────────────────────────────────────
+        if (error?.response?.status === 429) {
+            return repondre(
+                `⏳ *NEXUS-AI is temporarily busy.*\n\n` +
+                `Please try again in a moment.`
+            );
+        }
 
-      if (status === 429) {
+        if (error?.response?.status === 400) {
+            return repondre(
+                `❌ *NEXUS-AI Request Error*\n\n` +
+                `The AI service rejected the request.`
+            );
+        }
+
         return repondre(
-          `╭━━━〔 ⏳ NEXUS-AI 〕━━━╮
-┃
-┃ Groq rate limit reached.
-┃
-┃ Please wait a little and
-┃ try again.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
+            `⚠️ *NEXUS-AI encountered an error.*\n\n` +
+            `Please try again later.`
         );
-      }
-
-      // ───────────────────────────────────────
-      // AUTHENTICATION ERROR
-      // ───────────────────────────────────────
-
-      if (
-        status === 401 ||
-        status === 403
-      ) {
-        return repondre(
-          `╭━━━〔 🔐 NEXUS-AI 〕━━━╮
-┃
-┃ Groq authentication failed.
-┃
-┃ Please check the
-┃ GROQ_API_KEY configuration.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-        );
-      }
-
-      // ───────────────────────────────────────
-      // MODEL ERROR
-      // ───────────────────────────────────────
-
-      if (status === 400) {
-        return repondre(
-          `╭━━━〔 ⚠️ NEXUS-AI 〕━━━╮
-┃
-┃ Groq rejected the request.
-┃
-┃ Model:
-┃ ${GROQ_MODEL}
-┃
-┃ Check your Groq model
-┃ configuration.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-        );
-      }
-
-      // ───────────────────────────────────────
-      // GENERAL ERROR
-      // ───────────────────────────────────────
-
-      return repondre(
-        `╭━━━〔 ❌ NEXUS-AI 〕━━━╮
-┃
-┃ AI service is temporarily
-┃ unavailable.
-┃
-┃ Please try again shortly.
-┃
-╰━━━━━━━━━━━━━━━━━━━━━━━━━━╯`
-      );
     }
-  }
-);
+});
