@@ -39,12 +39,12 @@ zokou({ nomCom: "ping", categorie: "General" }, async (dest, zk, commandeOptions
         forwardingScore: 999,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-              newsletterJid: '120363288304618280@newsletter',
+              newsletterJid: '120363417804135599@newsletter',
               newsletterName: 'NEXUS-AI',
               serverMessageId: 143},
         externalAdReply: {
           
-          title: "Follow for updates 💙",
+          title: "Follow for updates ",
       body: "Enjoy...",
       thumbnailUrl: conf.URL,
           sourceUrl: conf.GURL,
@@ -55,7 +55,7 @@ zokou({ nomCom: "ping", categorie: "General" }, async (dest, zk, commandeOptions
     }, { quoted: ms });
 
     await zk.sendMessage(dest, {
-        text: "```my repo is here https://github.com/Pkdriller01/NEXUS-AI```"
+        text: "```my repo is here https://github.com/officialpkdriller/NEXUS-XMD```"
     } ,{ quoted: ms });// Voice note form
     }catch (e) {
         console.log("❌ Ping Command Error: " + e);
