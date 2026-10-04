@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/officialpkdiller/NEXUS-AI">
-    <img alt="NEXUS-AI docs" height="350" src="https://files.catbox.moe/8gw009.png">
+    <img alt="NEXUS-AI docs" height="https://files.catbox.moe/u4rqiq.jp">
   </a>
 </p>
 
