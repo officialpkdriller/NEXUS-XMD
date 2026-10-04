@@ -1,8 +1,3 @@
-
-
-
-
-
 const util = require('util');
 const fs = require('fs-extra');
 const axios = require('axios');
@@ -10,9 +5,6 @@ const { zokou } = require(__dirname + "/../framework/zokou");
 const os = require("os");
 const moment = require("moment-timezone");
 const conf = require(__dirname + "/../set");
-
-const AUDIO_URL = "https://files.catbox.moe/mfhv0a.mp3"; // New audio URL
-const THUMBNAIL_URL = "https://files.catbox.moe/ts2az9.jpg"; // New image URL
 
 moment.tz.setDefault(`${conf.TZ}`);
 
@@ -23,41 +15,31 @@ const getTimeAndDate = () => {
     };
 };
 
-// Ping Command
 zokou({ nomCom: "ping", categorie: "General" }, async (dest, zk, commandeOptions) => {
-    let { ms } = commandeOptions;
+    let { ms, repondre } = commandeOptions;
     const { time, date } = getTimeAndDate();
-    const ping = Math.floor(Math.random() * 1000) + 1; // Generate a random ping between 1ms - 100ms
+    const ping = Math.floor(Math.random() * 100) + 20;
+
+    // Uptime calc
+    let uptimeSec = process.uptime();
+    let hours = Math.floor(uptimeSec / 3600);
+    let minutes = Math.floor((uptimeSec % 3600) / 60);
+    let seconds = Math.floor(uptimeSec % 60);
 
     try {
-    await zk.sendMessage(dest, {
-        audio: { url: AUDIO_URL }, 
-            mimetype: 'audio/mp4', 
-            ptt: true, // Voice note form
-      text: `Pong...: ${ping}ms\n🎧💻`,
-      contextInfo: {
-        forwardingScore: 999,
-            isForwarded: true,
-            forwardedNewsletterMessageInfo: {
-              newsletterJid: '120363417804135599@newsletter',
-              newsletterName: 'NEXUS-AI',
-              serverMessageId: 143},
-        externalAdReply: {
-          
-          title: "Follow for updates ",
-      body: "Enjoy...",
-      thumbnailUrl: conf.URL,
-          sourceUrl: conf.GURL,
-          mediaType: 1,
-          
-        }
-      }
-    }, { quoted: ms });
+        let text = `*PONG!* ⚡\n\n`;
+        text += `> Speed : ${ping}ms\n`;
+        text += `> Time : ${time}\n`;
+        text += `> Date : ${date}\n`;
+        text += `> Uptime : ${hours}h ${minutes}m ${seconds}s\n`;
+        text += `> Platform : ${os.platform()}\n`;
+        text += `> Ram : ${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`;
 
-    await zk.sendMessage(dest, {
-        text: "```my repo is here https://github.com/officialpkdriller/NEXUS-XMD```"
-    } ,{ quoted: ms });// Voice note form
-    }catch (e) {
+        await zk.sendMessage(dest, {
+            text: text
+        }, { quoted: ms });
+
+    } catch (e) {
         console.log("❌ Ping Command Error: " + e);
         repondre("❌ Error: " + e);
     }
