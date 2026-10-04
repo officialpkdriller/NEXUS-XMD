@@ -132,7 +132,7 @@ zokou(
       // =========================
       await sock.sendMessage(jid, {
         image: {
-          url: "https://files.catbox.moe/j91lnc.jpeg"
+          url: "https://files.catbox.moe/u4rqiq.jpg"
         },
         caption: header + body + footer,
         contextInfo: {
