@@ -2,10 +2,11 @@
 const os = require("os");
 const { zokou } = require("../framework/zokou");
 
-const BOT_NAME = "NEXUS-AI";
-const OWNER = "PK-Tech";
+// ═══════════════════════════════════════
+//          NEXUS-AI SYSTEM TOOLS
+//             Powered by PK-Tech
+// ═══════════════════════════════════════
 
-// Format bot uptime
 function formatUptime(seconds) {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -15,119 +16,146 @@ function formatUptime(seconds) {
     return `${days}d ${hours}h ${minutes}m ${secs}s`;
 }
 
+// ───────────────────────────────────────
 // PING COMMAND
-zokou({
-    nomCom: "ping",
-    aliases: ["pong"],
-    categorie: "General",
-    reaction: "🏓",
-    desc: "Check NEXUS-AI response time"
-}, async (dest, zk, commandeOptions) => {
-    const { ms } = commandeOptions;
-    const start = Date.now();
+// ───────────────────────────────────────
 
-    const sent = await zk.sendMessage(dest, {
-        text: "🏓 *NEXUS-AI is responding...*"
-    }, { quoted: ms });
+zokou(
+    {
+        nomCom: "ping",
+        categorie: "General"
+    },
+    async (dest, zk, commandeOptions) => {
+        const { repondre } = commandeOptions;
 
-    const latency = Date.now() - start;
+        const start = Date.now();
 
-    return zk.sendMessage(dest, {
-        text: `┌───「 NEXUS PING 」
-│
-│  Status   : Online
-│  Latency  : ${latency} ms
-│  Runtime  : ${formatUptime(process.uptime())}
-│
-└──────────────`
-    }, { quoted: ms });
-});
-
-// ALIVE COMMAND
-zokou({
-    nomCom: "alive",
-    aliases: ["online"],
-    categorie: "General",
-    reaction: "💠",
-    desc: "Check NEXUS-AI online status"
-}, async (dest, zk, commandeOptions) => {
-    const { ms } = commandeOptions;
-
-    return zk.sendMessage(dest, {
-        text: `┌───「 ${BOT_NAME} 」
-│
-│  System    : Active
-│  Status    : Running
-│  Uptime    : ${formatUptime(process.uptime())}
-│  Developer : ${OWNER}
-│
-│  NEXUS-AI is alive and ready.
-│
-└──────────────`
-    }, { quoted: ms });
-});
-
-// TEST COMMAND
-zokou({
-    nomCom: "test",
-    aliases: ["check"],
-    categorie: "General",
-    reaction: "🧪",
-    desc: "Test NEXUS-AI system"
-}, async (dest, zk, commandeOptions) => {
-    const { ms } = commandeOptions;
-    const memory = process.memoryUsage();
-    const usedMemory = (memory.heapUsed / 1024 / 1024).toFixed(2);
-    const totalMemory = (os.totalmem() / 1024 / 1024 / 1024).toFixed(2);
-
-    return zk.sendMessage(dest, {
-        text: `┌───「 SYSTEM TEST 」
-│
-│  Handler  : Working
-│  Client   : Connected
-│  Node.js  : ${process.version}
-│  Memory   : ${usedMemory} MB
-│  RAM      : ${totalMemory} GB
-│  Platform : ${os.platform()}
-│
-│  Result   : Passed
-│
-└──────────────`
-    }, { quoted: ms });
-});
-
-// SPEED COMMAND
-zokou({
-    nomCom: "speed",
-    aliases: ["latency"],
-    categorie: "General",
-    reaction: "⚡",
-    desc: "Check NEXUS-AI speed"
-}, async (dest, zk, commandeOptions) => {
-    const { ms } = commandeOptions;
-    const start = Date.now();
-
-    try {
-        const sent = await zk.sendMessage(dest, {
-            text: "⚡ *Measuring NEXUS-AI speed...*"
-        }, { quoted: ms });
+        await repondre("⏳ *NEXUS-AI is measuring network response...*");
 
         const latency = Date.now() - start;
 
-        return zk.sendMessage(dest, {
-            text: `┌───「 SPEED TEST 」
-│
-│  Response : ${latency} ms
-│  Status   : Stable
-│  Uptime   : ${formatUptime(process.uptime())}
-│
-└──────────────`
-        }, { quoted: ms });
-    } catch (error) {
-        console.error("NEXUS-AI Speed Error:", error);
-        return zk.sendMessage(dest, {
-            text: "Unable to measure speed right now.",
-        }, { quoted: ms });
+        return repondre(
+            `╭━━〔 *NEXUS-AI PING* 〕━━╮
+┃
+┃  ⚡ *Response:* ${latency} ms
+┃  🟢 *Status:* Online
+┃  🤖 *Engine:* NEXUS-AI
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+
+> Powered by PK-Tech`
+        );
     }
-});
+);
+
+// ───────────────────────────────────────
+// ALIVE COMMAND
+// ───────────────────────────────────────
+
+zokou(
+    {
+        nomCom: "alive",
+        categorie: "General"
+    },
+    async (dest, zk, commandeOptions) => {
+        const { repondre } = commandeOptions;
+
+        const now = new Date();
+        const date = now.toLocaleDateString("en-GB", {
+            timeZone: "Africa/Nairobi"
+        });
+        const time = now.toLocaleTimeString("en-GB", {
+            timeZone: "Africa/Nairobi",
+            hour12: false
+        });
+
+        const mode = process.env.MODE || "public";
+
+        return repondre(
+            `╭━━〔 *NEXUS-AI* 〕━━╮
+┃
+┃  ✨ *System:* Active
+┃  🟢 *Status:* Running
+┃  👑 *Developer:* PK-Tech
+┃  🌐 *Mode:* ${mode}
+┃  📅 *Date:* ${date}
+┃  🕒 *Time:* ${time}
+┃  ⏱️ *Uptime:* ${formatUptime(process.uptime())}
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+
+> Your WhatsApp assistant is ready.
+> Powered by PK-Tech`
+        );
+    }
+);
+
+// ───────────────────────────────────────
+// TEST COMMAND
+// ───────────────────────────────────────
+
+zokou(
+    {
+        nomCom: "test",
+        categorie: "General"
+    },
+    async (dest, zk, commandeOptions) => {
+        const { repondre } = commandeOptions;
+
+        const memory = process.memoryUsage();
+        const totalMemory = os.totalmem();
+        const freeMemory = os.freemem();
+        const usedMemory = totalMemory - freeMemory;
+
+        return repondre(
+            `╭━━〔 *NEXUS-AI DIAGNOSTICS* 〕━━╮
+┃
+┃  🧪 *System Test:* Passed
+┃  🟢 *Runtime:* Operational
+┃  💾 *Bot RAM:* ${(memory.rss / 1024 / 1024).toFixed(2)} MB
+┃  🖥️ *System RAM:* ${(usedMemory / 1024 / 1024 / 1024).toFixed(2)} GB used
+┃  📦 *Node.js:* ${process.version}
+┃  ⚙️ *Platform:* ${os.platform()}
+┃  ⏱️ *Uptime:* ${formatUptime(process.uptime())}
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+
+> NEXUS-AI system check complete.`
+        );
+    }
+);
+
+// ───────────────────────────────────────
+// SPEED COMMAND
+// ───────────────────────────────────────
+
+zokou(
+    {
+        nomCom: "speed",
+        categorie: "General"
+    },
+    async (dest, zk, commandeOptions) => {
+        const { repondre } = commandeOptions;
+
+        const start = Date.now();
+
+        await repondre("⚡ *NEXUS-AI is checking performance...*");
+
+        const elapsed = Date.now() - start;
+
+        return repondre(
+            `╭━━〔 *NEXUS-AI SPEED* 〕━━╮
+┃
+┃  🚀 *Response Time:* ${elapsed} ms
+┃  ⚡ *Performance:* Active
+┃  🟢 *Connection:* Ready
+┃  ⏱️ *Uptime:* ${formatUptime(process.uptime())}
+┃
+╰━━━━━━━━━━━━━━━━━━╯
+
+> NEXUS-AI performance monitor
+> Powered by PK-Tech`
+        );
+    }
+);
 ```
