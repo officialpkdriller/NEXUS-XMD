@@ -8,13 +8,13 @@ const conf = require(__dirname + "/../set");
 moment.tz.setDefault(conf.TZ);
 
 zokou({ nomCom: "repo", categorie: "General", reaction: "📦" }, async (dest, zk, commandeOptions) => {
-    const { ms } = commandeOptions;
+    const { ms, repondre } = commandeOptions;
 
     const REPO_API = "https://api.github.com/repos/officialPkdriller/NEXUS-AI";
     const REPO_URL = "https://github.com/officialPkdriller/NEXUS-AI";
 
     try {
-        const res = await axios.get(REPO_API, { headers: { "User-Agent": "NEXUS-AI" }, timeout: 5000 });
+        const res = await axios.get(REPO_API, { headers: { "User-Agent": "NEXUS-AI" }, timeout: 10000 });
         const data = res.data;
 
         const stars = data.stargazers_count || 0;
@@ -23,50 +23,34 @@ zokou({ nomCom: "repo", categorie: "General", reaction: "📦" }, async (dest, z
         const watchers = data.watchers_count || 0;
         const owner = data.owner.login;
         const repoName = data.name;
-        const description = data.description || "No description available";
+        const description = data.description || "No description";
         const lastUpdate = moment(data.updated_at).format("DD/MM/YYYY HH:mm");
 
         const time = moment().format("HH:mm:ss");
         const date = moment().format("DD/MM/YYYY");
 
-        const msg = `╭─❏ *📦 NEXUS-AI REPOSITORY*\n` +
-                    `│\n` +
-                    `│ 📝 Description: *${description.substring(0, 50)}${description.length > 50 ? '...' : ''}*\n` +
-                    `│ 👨‍💻 Developer: *${owner}*\n` +
-                    `│ 📁 Repo: *${repoName}*\n` +
-                    `│ ⭐ Stars: *${stars}*\n` +
-                    `│ 🍴 Forks: *${forks}*\n` +
-                    `│ 👁 Watchers: *${watchers}*\n` +
-                    `│ 🐛 Issues: *${issues}*\n` +
-                    `│ 🔄 Last Update: *${lastUpdate}*\n` +
-                    `│ 🌐 Repo Link: ${REPO_URL}\n` +
-                    `│\n` +
-                    `│ 📆 Date: *${date}*\n` +
-                    `│ 🕒 Time: *${time}*\n` +
-                    `╰───────────────❏`;
+        let msg = `╭─❏ *📦 NEXUS-AI REPOSITORY*\n`;
+            msg += `│\n`;
+            msg += `│ 📝 Desc: *${description.substring(0, 60)}*\n`;
+            msg += `│ 👨‍💻 Dev: *${owner}*\n`;
+            msg += `│ 📁 Repo: *${repoName}*\n`;
+            msg += `│ ⭐ Stars: *${stars}*\n`;
+            msg += `│ 🍴 Forks: *${forks}*\n`;
+            msg += `│ 👁 Watchers: *${watchers}*\n`;
+            msg += `│ 🐛 Issues: *${issues}*\n`;
+            msg += `│ 🔄 Update: *${lastUpdate}*\n`;
+            msg += `│ 🌐 Link: ${REPO_URL}\n`;
+            msg += `│\n`;
+            msg += `│ 📆 Date: *${date}*\n`;
+            msg += `│ 🕒 Time: *${time}*\n`;
+            msg += `╰───────────────❏`;
 
         await zk.sendMessage(dest, {
-            text: msg,
-            contextInfo: {
-                forwardingScore: 999,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterJid: "120363417804135599@newsletter",
-                    newsletterName: "NEXUS-AI",
-                    serverMessageId: 143
-                },
-                externalAdReply: {
-                    title: "📦 NEXUS-AI REPO INFO",
-                    body: "Visit the repository for more details",
-                    thumbnailUrl: conf.LOGO,
-                    sourceUrl: REPO_URL,
-                    mediaType: 1
-                }
-            }
+            text: msg
         }, { quoted: ms });
 
     } catch (e) {
         console.log("❌ Repo Command Error:", e);
-        await zk.sendMessage(dest, { text: `❌ Error fetching repo info: ${e.message}` }, { quoted: ms });
+        repondre(`❌ Error fetching repo: ${e.message}`);
     }
 });
