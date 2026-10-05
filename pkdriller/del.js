@@ -1,42 +1,70 @@
-const { zokou } = require(__dirname + "/../framework/zokou");
 
-zokou({
-  nomCom: "del",
-  aliases: ["delete", "d", "clear"],
-  categorie: "General"
-}, async (dest, zk, commandeOptions) => {
+const { zokou } = require("../framework/zokou");
 
-  const { ms, repondre, msgRepondu } = commandeOptions;
+zokou(
+  {
+    nomCom: "del",
+    aliases: ["delete", "d"],
+    categorie: "General",
+    reaction: "🗑️"
+  },
+  async (dest, zk, commandeOptions) => {
+    const { ms, repondre } = commandeOptions;
 
-  try {
-    if (!msgRepondu) {
-      return await repondre("❌ Reply to the message you want to delete.");
+    try {
+      if (!ms || !ms.message) {
+        return repondre("❌ Reply to the message you want to delete.");
+      }
+
+      const contextInfo =
+        ms.message?.extendedTextMessage?.contextInfo;
+
+      if (!contextInfo?.quotedMessage || !contextInfo?.stanzaId) {
+        return repondre("❌ Please reply to a message first.");
+      }
+
+      await zk.sendMessage(dest, {
+        react: {
+          text: "⌛",
+          key: ms.key
+        }
+      }).catch(() => {});
+
+      const quotedParticipant = contextInfo.participant;
+
+      const deleteKey = {
+        remoteJid: dest,
+        fromMe: false,
+        id: contextInfo.stanzaId
+      };
+
+      if (quotedParticipant) {
+        deleteKey.participant = quotedParticipant;
+      }
+
+      await zk.sendMessage(dest, {
+        delete: deleteKey
+      });
+
+      await zk.sendMessage(dest, {
+        react: {
+          text: "✅",
+          key: ms.key
+        }
+      }).catch(() => {});
+
+    } catch (error) {
+      console.error("NEXUS-AI del command error:", error);
+
+      await zk.sendMessage(dest, {
+        react: {
+          text: "❌",
+          key: ms?.key
+        }
+      }).catch(() => {});
+
+      return repondre("❌ Failed to delete the message.");
     }
-
-    // Fix: zokou zingine zina key ndani ya msgRepondu
-    const quotedKey = msgRepondu.key || {};
-    
-    const idToDelete = msgRepondu.id || quotedKey.id;
-    const fromMe = msgRepondu.fromMe || quotedKey.fromMe || false;
-    const sender = msgRepondu.sender || quotedKey.participant;
-
-    if (!idToDelete) {
-      return await repondre("❌ Can't get message ID to delete.");
-    }
-
-    const deleteKey = {
-      remoteJid: dest,
-      fromMe: fromMe,
-      id: idToDelete,
-      participant: fromMe ? undefined : sender
-    };
-
-    await zk.sendMessage(dest, { delete: deleteKey });
-
-  } catch (error) {
-    console.log("❌ Del Command Error:", error);
-    // Hii ndio ilikuwa inazima bot - sasa tunai-catch
-    await repondre(`❌ Failed: ${error.message}`);
   }
-
-});
+);
+```
