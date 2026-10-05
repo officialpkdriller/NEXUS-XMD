@@ -2,36 +2,41 @@ const { zokou } = require(__dirname + "/../framework/zokou");
 
 zokou({
   nomCom: "del",
-  aliases: ["delete", "d"],
-  categorie: "Group"
+  aliases: ["delete", "d", "clear"],
+  categorie: "General"
 }, async (dest, zk, commandeOptions) => {
 
   const { ms, repondre, msgRepondu } = commandeOptions;
 
   try {
-    // Kama huna ms (key ya message yako) na msgRepondu
-    if (!ms || !ms.key) {
-      return;
-    }
-
-    // Lazima u-reply message
     if (!msgRepondu) {
-      return repondre("❌ Reply to a message to delete it.");
+      return await repondre("❌ Reply to the message you want to delete.");
     }
 
-    // Logic kutoka kwa code uliyonitumia
+    // Fix: zokou zingine zina key ndani ya msgRepondu
+    const quotedKey = msgRepondu.key || {};
+    
+    const idToDelete = msgRepondu.id || quotedKey.id;
+    const fromMe = msgRepondu.fromMe || quotedKey.fromMe || false;
+    const sender = msgRepondu.sender || quotedKey.participant;
+
+    if (!idToDelete) {
+      return await repondre("❌ Can't get message ID to delete.");
+    }
+
     const deleteKey = {
       remoteJid: dest,
-      fromMe: msgRepondu.fromMe || false,
-      id: msgRepondu.id,
-      participant: msgRepondu.fromMe ? undefined : msgRepondu.sender
+      fromMe: fromMe,
+      id: idToDelete,
+      participant: fromMe ? undefined : sender
     };
 
     await zk.sendMessage(dest, { delete: deleteKey });
 
   } catch (error) {
     console.log("❌ Del Command Error:", error);
-    repondre(`❌ Failed to delete: ${error.message}`);
+    // Hii ndio ilikuwa inazima bot - sasa tunai-catch
+    await repondre(`❌ Failed: ${error.message}`);
   }
 
 });
