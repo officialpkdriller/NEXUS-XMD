@@ -10,49 +10,32 @@ zokou({
   categorie: "General"
 }, async (dest, zk, commandeOptions) => {
 
-  const { ms } = commandeOptions;
+  const { ms, repondre } = commandeOptions;
 
   try {
 
     const time = moment().format("HH:mm:ss");
     const date = moment().format("DD/MM/YYYY");
 
-    let msg = `╭─❏ *👑 NEXUS-AI DEVELOPER*\n` +
-              `│\n` +
-              `│ 👤 Name: *PKDRILLER*\n` +
-              `│ 🌍 Country: *Kenya 🇰🇪*\n` +
-              `│ 📆 Date: *${date}*\n` +
-              `│ 🕒 Time: *${time}*\n` +
-              `│\n` +
-              `│ 💬 WhatsApp: wa.me/${conf.NUMERO_OWNER}\n` +
-              `│ 🌐 GitHub: https://github.com/officialPkdriller` +
-              `│\n` +
-              `╰───────────────❏`;
+    let msg = `╭─❏ *👑 NEXUS-AI DEVELOPER* \n`;
+        msg += `│\n`;
+        msg += `│ 👤 Name: *PKDRILLER*\n`;
+        msg += `│ 🌍 Country: *Kenya 🇰🇪*\n`;
+        msg += `│ 📆 Date: *${date}*\n`;
+        msg += `│ 🕒 Time: *${time}*\n`;
+        msg += `│\n`;
+        msg += `│ 💬 WhatsApp: wa.me/${conf.NUMERO_OWNER}\n`;
+        msg += `│ 🌐 GitHub: github.com/officialPkdriller\n`;
+        msg += `│\n`;
+        msg += `╰───────────────❏`;
 
     await zk.sendMessage(dest, {
-      text: msg,
-      contextInfo: {
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: {
-          newsletterJid: "120363417804135599@newsletter",
-          newsletterName: "NEXUS-AI",
-          serverMessageId: 143
-        },
-        externalAdReply: {
-          title: "👑 NEXUS-AI DEVELOPER",
-          body: "Powered by PKDRILLER ⚡",
-          thumbnailUrl: "https://files.catbox.moe/e2rhpu.jpg",
-          sourceUrl: conf.GURL,
-          mediaType: 1,
-          renderLargerThumbnail: true
-        }
-      }
+      text: msg
     }, { quoted: ms });
 
   } catch (e) {
     console.log("❌ Owner Command Error:", e);
-    await zk.sendMessage(dest, { text: `❌ Error: ${e}` }, { quoted: ms });
+    repondre(`❌ Error: ${e}`);
   }
 
 });
