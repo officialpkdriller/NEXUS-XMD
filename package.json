@@ -2,10 +2,10 @@
   "name": "NEXUS-AI",
   "version": "2.0.0",
   "description": "WhatsApp Multi Device Bot",
-  "main": "index.js",
+  "main": "plugins.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node plugins.js"
   },
   "keywords": [
     "termux",
