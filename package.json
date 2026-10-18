@@ -2,10 +2,10 @@
   "name": "NEXUS-AI",
   "version": "2.0.0",
   "description": "WhatsApp Multi Device Bot",
-  "main": "pkdriller.js",
+  "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node pkdriller.js"
+    "start": "node index.js"
   },
   "keywords": [
     "termux",
