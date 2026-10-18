@@ -4,7 +4,7 @@ index.js.before-*.js
 index.js.*.backup.js
 
 # Local JSON runtime database.
-blaze-data.json
+pkdriller-data.json
 bmbtech-data.json
 asset/banGroup.json
 asset/banUser.json
