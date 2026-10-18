@@ -1470,10 +1470,10 @@ setTimeout(() => {
           console.log("------------------/-----");
           console.log("🤖 NEXUS-AI is Online 🕸\n\n");
           console.log("📦 Loading NEXUS-AI Commands ...\n");
-          fs.readdirSync(__dirname + "/pkdriller").forEach(_0x5c00ae => {
+          fs.readdirSync(__dirname + "/plugins").forEach(_0x5c00ae => {
             if (path.extname(_0x5c00ae).toLowerCase() == ".js") {
               try {
-                require(__dirname + "/pkdriller/" + _0x5c00ae);
+                require(__dirname + "/plugins/" + _0x5c00ae);
                 console.log("✅ " + _0x5c00ae + " Installed Successfully");
               } catch (_0x12f781) {
                 console.log("❌ " + _0x5c00ae + " could not be installed due to: " + _0x12f781);
